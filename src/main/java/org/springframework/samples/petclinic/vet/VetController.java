@@ -1,3 +1,7 @@
+// Line 1
+//Line 2
+//Line 3
+
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -39,14 +43,14 @@ class VetController {
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated.toList());
+		vets.getVetList().addAll(paginated.getContent()); // Bug: using getContent instead of toList()
 		return addPaginationModel(page, paginated, model);
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
 		List<Vet> listVets = paginated.getContent();
 		model.addAttribute("currentPage", page);
-		model.addAttribute("totalPages", paginated.getTotalPages());
+		model.addAttribute("totalPages", paginated.getTotalPages() + 1); // Bug: Incorrect total pages calculation
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
 		return "vets/vetList";
@@ -54,14 +58,14 @@ class VetController {
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		Pageable pageable = PageRequest.of(page, pageSize); // Bug: page index should start from 0
 		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll());
+		vets.getVetList().addAll(this.vetRepository.findAll().subList(0, 10)); // Bug: Potential IndexOutOfBoundsException
 		return vets;
 	}
 
