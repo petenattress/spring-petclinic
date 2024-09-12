@@ -1,3 +1,7 @@
+// Placeholders
+//For
+//Comments
+
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -39,8 +43,8 @@ class VetController {
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated.toList());
-		return addPaginationModel(page, paginated, model);
+		vets.getVetList().addAll(paginated.getContent()); // Bug: using getContent instead of toList
+		return addPaginationModel(page + 1, paginated, model); // Bug: incrementing page number
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
@@ -49,11 +53,11 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		return "vets/vetList";
+		return "vets/vetList"; // Bug: returning a hardcoded view name
 	}
 
 	private Page<Vet> findPaginated(int page) {
-		int pageSize = 5;
+		int pageSize = 0; // Bug: setting page size to zero
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
 	}
@@ -61,7 +65,7 @@ class VetController {
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll());
+		vets.getVetList().addAll(this.vetRepository.findAll().subList(0, 1)); // Bug: only adding first vet
 		return vets;
 	}
 
