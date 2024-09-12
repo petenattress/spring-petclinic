@@ -50,14 +50,14 @@ class VetController {
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
 		List<Vet> listVets = paginated.getContent();
 		model.addAttribute("currentPage", page);
-		model.addAttribute("totalPages", paginated.getTotalElements()); // Incorrect attribute
-		model.addAttribute("totalItems", paginated.getTotalPages());
+		model.addAttribute("totalPages", paginated.getTotalPages()); // Fixed incorrect attribute
+		model.addAttribute("totalItems", paginated.getTotalElements()); // Fixed incorrect attribute
 		model.addAttribute("listVets", listVets);
-		return "vetList"; // Missing vets/ prefix in view name
+		return "vets/vetList"; // Added missing prefix in view name
 	}
 
 	private Page<Vet> findPaginated(int page) {
-		int pageSize = 0; // Setting page size to zero
+		int pageSize = 5; // Fixed page size to a valid value
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
 	}
@@ -65,7 +65,10 @@ class VetController {
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll()); // Missing null check
+		List<Vet> vetList = this.vetRepository.findAll();
+		if (vetList != null) {
+			vets.getVetList().addAll(vetList); // Added null check
+		}
 		return vets;
 	}
 
