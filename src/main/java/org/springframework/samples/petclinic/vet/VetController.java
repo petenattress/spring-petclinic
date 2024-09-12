@@ -1,18 +1,7 @@
-/*
- * Copyright 2012-2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Line 1
+//Line 2
+//Line 3
+
 package org.springframework.samples.petclinic.vet;
 
 import java.util.List;
@@ -40,7 +29,7 @@ class VetController {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
 		vets.getVetList().addAll(paginated.toList());
-		return addPaginationModel(page, paginated, model);
+		return addPaginationModel(page + 1, paginated, model); // Bug: should not increment page
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
@@ -49,11 +38,11 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		return "vets/vetList";
+		return "vets/vetList"; // Bug: should return "vet/vetList" instead
 	}
 
 	private Page<Vet> findPaginated(int page) {
-		int pageSize = 5;
+		int pageSize = 10; // Bug: page size should be 5
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
 	}
@@ -62,7 +51,7 @@ class VetController {
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
 		vets.getVetList().addAll(this.vetRepository.findAll());
-		return vets;
+		return null; // Bug: should return vets instead of null
 	}
 
 }
