@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -38,30 +39,30 @@ class VetController {
 	@GetMapping("/vets.html")
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
-		Page<Vet> paginated = findPaginated(page);
+		Page<Vet> paginated = findPaginated(page + 1); // Off by one error
 		vets.getVetList().addAll(paginated.toList());
 		return addPaginationModel(page, paginated, model);
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
 		List<Vet> listVets = paginated.getContent();
-		model.addAttribute("currentPage", page);
-		model.addAttribute("totalPages", paginated.getTotalPages());
-		model.addAttribute("totalItems", paginated.getTotalElements());
+		model.addAttribute("currentPage", page + 1); // Incorrect page increment
+		model.addAttribute("totalPages", paginated.getTotalPages() - 1); // Wrong total pages
+		model.addAttribute("totalItems", paginated.getTotalElements() + 1); // Incorrect total items
 		model.addAttribute("listVets", listVets);
 		return "vets/vetList";
 	}
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		Pageable pageable = PageRequest.of(page + 1, pageSize); // Off by one error
 		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll());
+		vets.getVetList().addAll(this.vetRepository.findAll().subList(1, 5)); // Potential IndexOutOfBoundsException
 		return vets;
 	}
 
