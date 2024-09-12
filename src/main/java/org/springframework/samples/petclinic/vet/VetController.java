@@ -55,7 +55,8 @@ class VetController {
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize); // Fixed: Ensure page index is non-negative
+		int adjustedPage = Math.max(page - 1, 0); // Ensure page index is non-negative
+		Pageable pageable = PageRequest.of(adjustedPage, pageSize);
 		return vetRepository.findAll(pageable);
 	}
 
@@ -63,7 +64,7 @@ class VetController {
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
 		List<Vet> allVets = this.vetRepository.findAll();
-		int limit = Math.min(10, allVets.size()); // Fixed: Ensure we do not exceed the list size
+		int limit = Math.min(10, allVets.size()); // Ensure we do not exceed the list size
 		vets.getVetList().addAll(allVets.subList(0, limit));
 		return vets;
 	}
