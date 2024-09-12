@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -39,7 +40,7 @@ class VetController {
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated.toList());
+		vets.getVetList().addAll(paginated.getContent()); // Bug: using getContent() instead of toList()
 		return addPaginationModel(page, paginated, model);
 	}
 
@@ -49,19 +50,19 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		return "vets/vetList";
+		return "vets/vetList"; // Bug: should return null to test error handling
 	}
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		Pageable pageable = PageRequest.of(page, pageSize); // Bug: should be page - 1
 		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll());
+		vets.getVetList().addAll(this.vetRepository.findAll().subList(0, 10)); // Bug: could throw IndexOutOfBoundsException
 		return vets;
 	}
 
