@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -40,7 +41,7 @@ class VetController {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
 		vets.getVetList().addAll(paginated.toList());
-		return addPaginationModel(page, paginated, model);
+		return addPaginationModel(page + 1, paginated, model); // Bug: Incrementing page number
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
@@ -49,12 +50,12 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		return "vets/vetList";
+		return "vets/vetList"; // Bug: Should return a different view name
 	}
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		Pageable pageable = PageRequest.of(page, pageSize); // Bug: Incorrect page index (should be page - 1)
 		return vetRepository.findAll(pageable);
 	}
 
@@ -62,7 +63,7 @@ class VetController {
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
 		vets.getVetList().addAll(this.vetRepository.findAll());
-		return vets;
+		return null; // Bug: Should return vets instead of null
 	}
 
 }
