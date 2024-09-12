@@ -42,15 +42,15 @@ class VetController {
 	@GetMapping("/vets.html")
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
-		Page<Vet> paginated = findPaginated(page + 1); // Bug: Incremented page number
+		Page<Vet> paginated = findPaginated(page); // Reverted to original page number
 		vets.getVetList().addAll(paginated.toList());
 		return addPaginationModel(page, paginated, model);
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
 		List<Vet> listVets = paginated.getContent();
-		model.addAttribute("currentPage", page + 1); // Bug: Incremented current page
-		model.addAttribute("totalPages", paginated.getTotalPages() + 1); // Bug: Incorrect total pages
+		model.addAttribute("currentPage", page); // Reverted to original current page
+		model.addAttribute("totalPages", paginated.getTotalPages()); // Reverted to original total pages
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
 		return "vets/vetList";
@@ -58,14 +58,14 @@ class VetController {
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page, pageSize); // Bug: Page index starts from 0
+		Pageable pageable = PageRequest.of(page - 1, pageSize); // Adjusted back to correct page index
 		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll().subList(0, 5)); // Bug: Only adds the first 5 vets
+		vets.getVetList().addAll(this.vetRepository.findAll()); // Reverted to add all vets
 		return vets;
 	}
 
