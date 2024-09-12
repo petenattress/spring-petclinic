@@ -29,7 +29,7 @@ class VetController {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
 		vets.getVetList().addAll(paginated.toList());
-		return addPaginationModel(page + 1, paginated, model); // Bug: should not increment page
+		return addPaginationModel(page, paginated, model); // Reverted to original behavior
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
@@ -38,11 +38,11 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		return "vets/vetList"; // Bug: should return "vet/vetList" instead
+		return "vets/vetList"; // Corrected to original path
 	}
 
 	private Page<Vet> findPaginated(int page) {
-		int pageSize = 10; // Bug: page size should be 5
+		int pageSize = 5; // Reverted to original page size
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
 	}
@@ -51,7 +51,7 @@ class VetController {
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
 		vets.getVetList().addAll(this.vetRepository.findAll());
-		return null; // Bug: should return vets instead of null
+		return vets; // Corrected to return vets
 	}
 
 }
