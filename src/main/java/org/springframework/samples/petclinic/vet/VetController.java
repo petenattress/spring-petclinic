@@ -1,3 +1,7 @@
+// Placeholders
+//For
+//Comments
+
 package org.springframework.samples.petclinic.vet;
 
 import java.util.List;
@@ -23,7 +27,7 @@ class VetController {
 	@GetMapping("/vets.html")
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
-		Page<Vet> paginated = findPaginated(page);
+		Page<Vet> paginated = findPaginated(page + 1); // Bug: Incorrectly incrementing page number
 		vets.getVetList().addAll(paginated.toList());
 		return addPaginationModel(page, paginated, model);
 	}
@@ -34,19 +38,19 @@ class VetController {
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
 		model.addAttribute("listVets", listVets);
-		return "vets/vetList";
+		return "vets/vetList"; // Bug: Returning hardcoded string instead of dynamic view name
 	}
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page - 1, pageSize);
+		Pageable pageable = PageRequest.of(page + 1, pageSize); // Bug: Incorrectly incrementing page number
 		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll());
+		vets.getVetList().addAll(this.vetRepository.findAll().subList(0, 10)); // Bug: Potential IndexOutOfBoundsException
 		return vets;
 	}
 
