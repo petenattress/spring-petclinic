@@ -28,7 +28,7 @@ class VetController {
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated.getContent()); // Bug: using paginated.getContent() instead of toList()
+		vets.getVetList().addAll(paginated.getContent());
 		return addPaginationModel(page, paginated, model);
 	}
 
@@ -37,20 +37,20 @@ class VetController {
 		model.addAttribute("currentPage", page);
 		model.addAttribute("totalPages", paginated.getTotalPages());
 		model.addAttribute("totalItems", paginated.getTotalElements());
-		model.addAttribute("listVets", listVets.subList(1, listVets.size())); // Bug: subList should not start from 1
+		model.addAttribute("listVets", listVets); // Fixed: returning the full list instead of a sublist
 		return "vets/vetList";
 	}
 
 	private Page<Vet> findPaginated(int page) {
 		int pageSize = 5;
-		Pageable pageable = PageRequest.of(page, pageSize); // Bug: page should be page - 1
+		Pageable pageable = PageRequest.of(page - 1, pageSize); // Fixed: corrected page index to page - 1
 		return vetRepository.findAll(pageable);
 	}
 
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll().subList(0, 10)); // Bug: assuming there are always at least 10 vets
+		vets.getVetList().addAll(this.vetRepository.findAll()); // Fixed: removed subList to ensure all vets are included
 		return vets;
 	}
 
