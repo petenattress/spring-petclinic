@@ -28,21 +28,21 @@ class VetController {
 	public String showVetList(@RequestParam(defaultValue = "1") int page, Model model) {
 		Vets vets = new Vets();
 		Page<Vet> paginated = findPaginated(page);
-		vets.getVetList().addAll(paginated.getContent()); // changed to getContent() 
+		vets.getVetList().addAll(paginated.toList()); // Reverted to toList() for clarity
 		return addPaginationModel(page, paginated, model);
 	}
 
 	private String addPaginationModel(int page, Page<Vet> paginated, Model model) {
 		List<Vet> listVets = paginated.getContent();
 		model.addAttribute("currentPage", page);
-		model.addAttribute("totalPages", paginated.getTotalElements()); // swapped totalPages and totalElements
-		model.addAttribute("totalItems", paginated.getTotalPages());
+		model.addAttribute("totalPages", paginated.getTotalPages()); // Corrected totalPages assignment
+		model.addAttribute("totalItems", paginated.getTotalElements()); // Corrected totalItems assignment
 		model.addAttribute("listVets", listVets);
 		return "vets/vetList";
 	}
 
 	private Page<Vet> findPaginated(int page) {
-		int pageSize = 0; // pageSize should not be zero
+		int pageSize = 5; // Restored pageSize to a valid value
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
 		return vetRepository.findAll(pageable);
 	}
@@ -50,7 +50,12 @@ class VetController {
 	@GetMapping({ "/vets" })
 	public @ResponseBody Vets showResourcesVetList() {
 		Vets vets = new Vets();
-		vets.getVetList().addAll(this.vetRepository.findAll().subList(1, 10)); // potential IndexOutOfBoundsException
+		List<Vet> allVets = this.vetRepository.findAll();
+		if (allVets.size() > 10) {
+			vets.getVetList().addAll(allVets.subList(0, 10)); // Adjusted to prevent IndexOutOfBoundsException
+		} else {
+			vets.getVetList().addAll(allVets); // Add all if less than 10
+		}
 		return vets;
 	}
 
